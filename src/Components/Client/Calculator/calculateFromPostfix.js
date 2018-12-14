@@ -2,7 +2,6 @@ let calculateFromPostfix = (...postfixExpn) => {
   let outputArray = [];
   let num1, num2;
   for (let item of postfixExpn) {
-    console.log(item);
     if (typeof item === "number") {
       outputArray.push(item);
     } else {
