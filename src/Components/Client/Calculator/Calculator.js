@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import generatePrecedence from "./generatePrecedence";
+import calculateFromPostfix from "./calculateFromPostfix";
+import "./calculator.css";
 
 class Calculator extends Component {
   constructor(props) {
@@ -19,9 +21,6 @@ class Calculator extends Component {
       postfixExpn: []
     });
   };
-  handleCalculation = () => {
-    this.toPostfix();
-  };
   pushtoCalculationStack = e => {
     if (this.state.currentStack.length !== 0) {
       let temp = "";
@@ -33,19 +32,19 @@ class Calculator extends Component {
         currentStack: [],
         calculationStack: this.state.calculationStack
           .concat(temp)
-          .concat(e.target.innerHTML),
-        displayHeader: this.state.displayHeader.concat(e.target.innerHTML)
+          .concat(e.target.value),
+        displayHeader: this.state.displayHeader.concat(e.target.value)
       });
     } else {
       this.setState({
         currentStack: [],
-        calculationStack: [...this.state.calculationStack, e.target.innerHTML],
-        displayHeader: this.state.displayHeader.concat(e.target.innerHTML)
+        calculationStack: [...this.state.calculationStack, e.target.value],
+        displayHeader: this.state.displayHeader.concat(e.target.value)
       });
     }
   };
 
-  toPostfix = () => {
+  handleCalculation = () => {
     let temp = "";
     for (let item of this.state.currentStack) {
       temp = temp + item;
@@ -99,53 +98,98 @@ class Calculator extends Component {
             }
           }
         }
-        this.setState({
-          postfixExpn: outputPfix
-        });
+        this.setState(
+          {
+            postfixExpn: outputPfix
+          },
+          () => {
+            this.setState({
+              displayHeader: calculateFromPostfix(...this.state.postfixExpn),
+              currentStack: calculateFromPostfix(...this.state.postfixExpn),
+              calculationStack: [],
+              postfixExpn: []
+            });
+          }
+        );
       }
     );
   };
 
   handleClick = e => {
     this.setState({
-      currentStack: this.state.currentStack.concat(e.target.innerHTML),
-      displayHeader: this.state.displayHeader.concat(e.target.innerHTML)
+      currentStack: this.state.currentStack.concat(e.target.value),
+      displayHeader: this.state.displayHeader.concat(e.target.value)
     });
   };
+
+  createButton = () => {};
   render() {
+    let row1 = [
+      [7, 8, 9, "+"],
+      [4, 5, 6, "-"],
+      [1, 2, 3, "*"],
+      [".", 0, "=", "/"],
+      ["(", ")", "^", "C"]
+    ];
+    const buttonGroup = row1.map(item => (
+      <div className="row justify-content-center">
+        {item.map(innerItem => {
+          if (typeof innerItem === "number" || innerItem === ".") {
+            return (
+              <button
+                key={innerItem}
+                className="col btn btn-primary p-3 rounded-0"
+                onClick={this.handleClick}
+                value={innerItem}
+              >
+                {innerItem}
+              </button>
+            );
+          } else {
+            if (innerItem === "=") {
+              return (
+                <button
+                  key={innerItem}
+                  className="col btn btn-primary p-3 rounded-0"
+                  onClick={this.handleCalculation}
+                  value={innerItem}
+                >
+                  {innerItem}
+                </button>
+              );
+            } else if (innerItem === "C") {
+              return (
+                <button
+                  key={innerItem}
+                  className="col btn btn-primary p-3 rounded-0"
+                  onClick={this.handleClear}
+                  value={innerItem}
+                >
+                  {innerItem}
+                </button>
+              );
+            } else {
+              return (
+                <button
+                  key={innerItem}
+                  className="col btn btn-primary p-3 rounded-0"
+                  onClick={this.pushtoCalculationStack}
+                  value={innerItem}
+                >
+                  {innerItem}
+                </button>
+              );
+            }
+          }
+        })}
+      </div>
+    ));
     return (
-      <div>
-        <button className="w-25 border">{this.state.displayHeader}</button>
-        <div>
-          <button onClick={this.handleClick}>7</button>
-          <button onClick={this.handleClick}>8</button>
-          <button onClick={this.handleClick}>9</button>
-          <button onClick={this.pushtoCalculationStack}>+</button>
+      <div className="container">
+        <div className="row justify-content-center height-50 text-center alert alert-primary border border-primary mb-2 bg-white">
+          <div className="col">{this.state.displayHeader}</div>
         </div>
-        <div>
-          <button onClick={this.handleClick}>4</button>
-          <button onClick={this.handleClick}>5</button>
-          <button onClick={this.handleClick}>6</button>
-          <button onClick={this.pushtoCalculationStack}>-</button>
-        </div>
-        <div>
-          <button onClick={this.handleClick}>1</button>
-          <button onClick={this.handleClick}>2</button>
-          <button onClick={this.handleClick}>3</button>
-          <button onClick={this.pushtoCalculationStack}>*</button>
-        </div>
-        <div>
-          <button onClick={this.handleClick}>.</button>
-          <button onClick={this.handleClick}>0</button>
-          <button onClick={this.toPostfix}>=</button>
-          <button onClick={this.pushtoCalculationStack}>/</button>
-        </div>
-        <div>
-          <button onClick={this.pushtoCalculationStack}>(</button>
-          <button onClick={this.pushtoCalculationStack}>)</button>
-          <button onClick={this.pushtoCalculationStack}>^</button>
-          <button onClick={this.handleClear}>C</button>
-        </div>
+        {buttonGroup}
       </div>
     );
   }
