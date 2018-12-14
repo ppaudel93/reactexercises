@@ -1,10 +1,14 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
 import "./App.css";
+import Calculator from "./Components/Client/Calculator/Calculator";
 
 class App extends Component {
   render() {
-    return <div>NOTHING</div>;
+    return (
+      <div>
+        <Calculator />
+      </div>
+    );
   }
 }
 
